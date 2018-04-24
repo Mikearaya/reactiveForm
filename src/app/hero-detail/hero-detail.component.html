@@ -1,6 +1,15 @@
 <h2>Hero Detail</h2>
 <h3><i>A FormGroup with multiple FormControls</i></h3>
-<form [formGroup]="heroForm">
+<form [formGroup]="heroForm" (ngSubmit)="onSubmit()"  >
+  <div style="margin-bottom: 1em;">
+    <button type="submit" 
+            [disabled]="heroForm.pristine"
+            class="btn btn-success" >Save</button> &nbsp;
+    <button type="button" 
+            (click)="revert()" 
+            [disabled]="heroForm.pristine" 
+            class="btn btn-danger">Revert</button>
+  </div>
   <div class="form-group">
     <label class="center-block">Name:
       <input class="form-control" formControlName="name">

@@ -1,6 +1,7 @@
 import { states, Address, Hero } from './../data-model';
 import { Component, OnInit, Input, OnChanges } from '@angular/core';
 import {FormBuilder, FormGroup, FormArray, Validators} from '@angular/forms';
+import { HeroService } from '../hero-service.service';
 
 @Component({
   selector: 'app-hero-detail',
@@ -14,9 +15,17 @@ export class HeroDetailComponent implements OnChanges {
   @Input() hero: Hero;
   heroForm: FormGroup;
   states = states;
+  nameChangeLog: string[] = [];
 
-  constructor(private fb: FormBuilder) {
+  logNameChange() {
+    const nameControl = this.heroForm.get('name');
+      nameControl.valueChanges.forEach((value: string) => this.nameChangeLog.push(value)
+    );
+  }
+  constructor(private fb: FormBuilder, 
+              private heroService: HeroService) {
     this.createForm();
+    this.logNameChange();
   }
   ngOnChanges() {
     this.rebuildForm();
@@ -47,4 +56,24 @@ export class HeroDetailComponent implements OnChanges {
     const addressFormArray = this.fb.array(addressFGs);
     this.heroForm.setControl('secretLairs', addressFormArray);
   }
+
+  prepareSaveHero(): Hero {
+    const formModel = this.heroForm.value;
+    const secretLairsDeepCopy: Address[] = formModel.secretLairs.map(
+      (address: Address) => Object.assign({}, address)
+    )
+    const saveHero: Hero = {
+      id: this.hero.id,
+      name: formModel.name as string, 
+      addresses: secretLairsDeepCopy
+    };
+    return saveHero;
+  }
+
+  onSubmit()  {
+    this.hero = this.prepareSaveHero();
+    this.heroService.updateHero(this.hero).subscribe();
+
+  }
+  revert()  {this.rebuildForm();}
 }
